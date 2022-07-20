@@ -72,7 +72,9 @@ class Point:
         self._priority = priority
         self._beep_count = 0
         # self.config --> ???
-       
+    
+    @property
+    def _vector(self):
         self._vector = np.array([x_coord, y_coord, z_coord])
 
     def pickle_MyClass(obj):
@@ -515,14 +517,14 @@ class User:
 
         # Use 'np.array' for User objects:
         users_array = np.array([[user._x_coord, user._y_coord, user._z_coord] for user in users])
-        print(users_array)
-
+        
+        # ___________________________ Case in which we have set a priori the number of cluster that we want to use to group the users: ___________________________
         
         if fixed_clusters == True:
             clusterer = KMeans(FIXED_CLUSTERS_NUM)
             clusterer.fit(users_array)
             users_clusters = [users_array[np.where(clusterer.labels_ == i)] for i in range(clusterer.n_clusters)]
-        
+
         # _________________________________________________________________________________________________________________________________________________________
 
         
@@ -532,7 +534,7 @@ class User:
             optimal_clusters_num, optimal_clusterer, current_best_silhoutte_score = None, None, 1.0            
             
             for current_cluster_num in CLUSTERS_NUM_TO_TEST:
-                current_clusterer = KMeans(current_cluster_num)
+                current_clusterer = Kmeans(current_cluster_num)
                 cluster_labels = current_clusterer.fit_predict(users_array)
                 # Use the silhouette score evaluates the 'goodness' of the current number of clusters considered: 
                 silhouette_avg = silhouette_score(users_array, cluster_labels)
@@ -1026,12 +1028,11 @@ if __name__ == '__main__':
 
     us = User
     centroids = us.centroids_user_cluster_generation(CENTROIDS_MIN_MAX_COORDS, FIXED_CLUSTERS_NUM) # --> You can change these arguments to get clusters spread out in a different way
-    users_clusters, users_xy = us.spread_users_around_clusters(centroids, 1, 1, 10, 16) # --> # --> You can change these arguments to get users spread out in a different way among clusters; you can change also the MIN and MAX users number per cluster
+    users_clusters, users_xy = us.spread_users_around_clusters(centroids, 1, 1, 8, 16) # --> # --> You can change these arguments to get users spread out in a different way among clusters; you can change also the MIN and MAX users number per cluster
     occurrences = [users_xy.count(user) for user in users_xy]
     users_points_heights = us.users_heights(points_matrix, users_xy)
     n_users = len(users_xy)
     users_xyz = us.create_users(points_matrix, users_xy, users_points_heights, n_users)
-    print(users_xyz)
     initial_clusterer, initial_usr_clusters = us.compute_clusterer(users_xyz)
     initial_centroids = us.actual_users_clusters_centroids(initial_clusterer)
 
@@ -1076,7 +1077,7 @@ if __name__ == '__main__':
     # ______________________________________________________________________________________________________________
 
     print("Scenario created.")
-    print("We Have", len(obs_points), "Obstacles in the scenario.")
+    print("ABBIAMO ", len(obs_points), "OSTACOLI")
     
     # ___________________________________________ Directory Creation and Saving: ___________________________________________
 

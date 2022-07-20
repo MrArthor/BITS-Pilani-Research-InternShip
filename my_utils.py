@@ -31,7 +31,7 @@ N_TIMESLOTS_PER_DAY = N_TIMESLOTS_PER_HOUR*24
 
 # TRAINING PARAMETERS
 EPISODES = 2000 # epochs
-ITERATIONS_PER_EPISODE = 30 # iterations per epoch
+ITERATIONS_PER_EPISODE = 30
 MOVE_USERS_EACH_N_EPOCHS = 300
 UPDATE_USERS_REQUESTS_EACH_N_ITERATIONS = 10
 STEPS = N_TIMESLOTS_PER_DAY
@@ -56,7 +56,7 @@ PERC_BATTERY_CHARGED_PER_IT = 20
 BATTERY_CHARGED_PER_IT = round((PERC_BATTERY_CHARGED_PER_IT*FULL_BATTERY_LEVEL)/100)
 #PERC_CONSUMPTION_PER_ITERATION = STEP_REDUCTION_TO_GO_TO_CS
 PERC_BATTERY_TO_GO_TO_CS = int(PERC_CONSUMPTION_PER_ITERATION/4) # --> 4/4 = 1
-N_UAVS = 2
+N_UAVS = 1
 PERC_CONSUMPTION_IF_HOVERING = 2
 
 PROPULSION_BATTERY_CONSUMPTION = 3.33
@@ -100,8 +100,8 @@ DIMENSION_2D = True # --> Enable/Disable 2D environment
 UNLIMITED_BATTERY = False # --> Enable/Disable battery limitation on UAVs
 INF_REQUEST = True # --> Enable/Disable continuous users requests 
 STATIC_REQUEST = True # --> Enable/Disable static (i.e., not moving users) request
-MULTI_SERVICE = True # --> Enable/Disable limitation on UAV bandwidth
-NOISE_ON_POS_MEASURE = True # --> Enable/Disable random error on the position of each UAV used 
+MULTI_SERVICE = False # --> Enable/Disable limitation on UAV bandwidth
+NOISE_ON_POS_MEASURE = False # --> Enable/Disable random error on the position of each UAV used 
 USERS_PRIORITY = False
 
 RAD_BETWEEN_POINTS = 2*pi/N_UAVS
@@ -129,7 +129,7 @@ DELAYED_START_PER_UAV = ITERATIONS_PER_EPISODE/TIME_SLOT_FOR_DELAYED_START # 30/
 UAV_FOOTPRINT = 2.5
 ACTUAL_UAV_FOOTPRINT = UAV_FOOTPRINT/CELL_RESOLUTION_PER_COL
 
-
+# CAMBIA IL CONSUMO DEGLI UAV NEL CASO IN CUI UTILIZZO UNA RISOLUZIONE DIVERSA DA QUELLA MINIMA --> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 HALF_RESOLUTION_X =(AREA_WIDTH//CELLS_COLS)/2
 HALF_RESOLUTION_Y =(AREA_WIDTH//CELLS_ROWS)/2
 HALF_RESOLUTION_Z = 0.5 # --> the resolution along z is fixed
@@ -338,10 +338,10 @@ DATA_GATHERING = 3
 UAVS_SERVICES = [NO_SERVICE, THROUGHPUT_REQUEST, EDGE_COMPUTING, DATA_GATHERING]
 SERVICE_PROBABILITIES = [0.1, 0.5, 0.25, 0.15]
 
-CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)], [(7, 7), (7,7)], [(6, 6), (2,2)], [(2, 2), (2,2)]] # --> [(min_x, max_x), (min_y, max_y)]
+#CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)], [(7, 7), (7,7)], [(6, 6), (2,2)], [(2, 2), (2,2)]] # --> [(min_x, max_x), (min_y, max_y)]
 #CENTROIDS_MIN_MAX_COORDS = [[(7, 7), (7,7)], [(6, 6), (2,2)], [(2, 2), (2,2)]] # [[(7, 7), (7,7)], [(2, 2), (2,2)]]
 #CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)], [(7, 7), (7,7)]]
-#CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)]]
+CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)]]
 FIXED_CLUSTERS_NUM = len(CENTROIDS_MIN_MAX_COORDS)
 # LIST OF THE NUMBER OF CLUSTERS TO TEST WHEN LOOKING FOR THE OPTIMAL NUMBER OF USERS CLUSTERS:
 CLUSTERS_NUM_TO_TEST = [3, 4, 5, 6, 7, 8, 9, 10]
@@ -388,18 +388,21 @@ POINTS_MATRIX = "points_matrix.npy"
 CS_POINTS = "cs_points.npy"
 ENODEB_POINT = "eNB_point.npy"
 HOSP_POINTS = "hosp_points.npy"
+
 CELLS_MATRIX = "cells_matrix.npy"
-CELL_MATRIX = "cells_matrix.npy"
 OBS_CELLS = "obs_cells.npy"
 CS_CELLS = "cs_cells.npy"
 ENB_CELLS = "enb_cells.npy"
 HOSP_CELLS = "hosp_cells.npy"
+
 POINTS_STATUS_MATRIX = "points_status_matrix.npy"
 CELLS_STATUS_MATRIX = "cells_status_matrix.npy"
 PERCEIVED_STATUS_MATRIX = "perceived_status_matrix.npy"
+
 INITIAL_USERS = "initial_users.npy"
 INITIAL_CENTROIDS = "initial_centroids.npy"
 INITIAL_CLUSTERS_RADIUSES = "initial_clusters_radiuses.npy"
 INITIAL_CLUSTERER = "initial_clusterer.npy"
 INITIAL_USERS_CLUSTERS = "initial_users_clusters.npy"
+
 AGENTS = "agents.npy"

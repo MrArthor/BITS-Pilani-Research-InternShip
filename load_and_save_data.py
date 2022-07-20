@@ -54,7 +54,7 @@ class Loader(object):
             with open(join(MAP_DATA_DIR, HOSP_POINTS), "rb") as f:
                 self._hosp_points = pickle.load(f)
         
-        with open(join(MAP_DATA_DIR, CELL_MATRIX), "rb") as f:
+        with open(join(MAP_DATA_DIR, CELLS_MATRIX), "rb") as f:
             self._cells_matrix = pickle.load(f)
         with open(join(MAP_DATA_DIR, OBS_CELLS), "rb") as f:
             self._obs_cells = pickle.load(f)

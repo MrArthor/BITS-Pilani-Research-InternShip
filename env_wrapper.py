@@ -15,9 +15,7 @@ import plotting
 from my_utils import *
 import agent
 from Astar import *
-import warnings
-warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
-start_q_table=None
+
 # _________ Main training parameters:_________
 
 SHOW_EVERY = 30
@@ -49,7 +47,7 @@ if (UNLIMITED_BATTERY==False):
     charging_set = env.charging_set
     come_home_set = env.come_home_set
 
-reset = env.reset
+reset_uavs = env.reset_uavs
 plot = plotting.Plot()
 centroids = env.cluster_centroids
 # Scale centroids according to the selected resolution:
@@ -643,10 +641,9 @@ n_active_users_per_episode = [0 for ep in range(EPISODES)]
 UAVs_used_bandwidth = [[0 for ep in range(EPISODES)] for uav in range(N_UAVS)]
 users_bandwidth_request_per_UAVfootprint = [[0 for ep in range(EPISODES)] for uav in range(N_UAVS)]
 
-MOVE_USERS = True
+MOVE_USERS = False
 
-
-# ______________________________________________________Start Training ____________________________________________________________________________
+# ________________________________________________________________________________ Training start: _____________________________________________________________________________________________________________
 
 print("\nSTART TRAINING . . .\n")
 for episode in range(1, EPISODES+1):
@@ -795,7 +792,7 @@ for episode in range(1, EPISODES+1):
             current_UAV_bandwidth[UAV] += UAV_BANDWIDTH - agents[UAV]._bandwidth
             current_requested_bandwidth[UAV] += env.current_requested_bandwidth
 
-            reset(agents[UAV])
+            reset_uavs(agents[UAV])
 
         current_QoE3 += len(env.all_users_in_all_foots)/len(env.users) if len(env.users)!=0 else 0 # --> Percentage of covered users (including also the users which are not requesting a service but which are considered to have the communication with UAVs on) 
         n_active_users_per_episode[episode-1] = n_active_users
@@ -841,13 +838,12 @@ for episode in range(1, EPISODES+1):
     print() 
 
     
-    # print("\nRendering animation for episode:", episode)
-    # if(episode%500==0):
-    # env.render()
-    # print("Animation rendered.\n")
+    print("\nRendering animation for episode:", episode)
+    env.render()
+    print("Animation rendered.\n")
     
     #if ((episode%500)==0): #(episode%250)==0 # --> You can change the condition to show (to save actually) or not the scenario of the current episode.
-    # env.render(saving_directory,  500)
+    env.render(saving_directory, episode, 500)
     if ((episode%500)==0):
         plot.users_wait_times(env.n_users, env.users, saving_directory, episode)
         

@@ -461,6 +461,9 @@ class UAVEnv(gym.Env):
         return (x, y) if DIMENSION_2D==True else (x, y, z)
 
     def render(self, where_to_save=None, episode=None, how_often_render=None):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # Used to save a .gif related to the environment animation for the current episode. #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         self.instant_to_render += 1
 
@@ -480,7 +483,10 @@ class UAVEnv(gym.Env):
         self.last_render = 0
         self.agents_paths = [[] for uav in range(N_UAVS)]
 
-    def reset(self, agent,):
+    def reset_uavs(self, agent,):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # Replace the 'agent' on an initial position randomly selected among the ones available for UAVs (it happens only when a crash occurs). #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         if (agent._battery_level == 0):
             agent._battery_level = FULL_BATTERY_LEVEL
@@ -494,8 +500,12 @@ class UAVEnv(gym.Env):
             agent._coming_home = False
 
     def update_users_requests(self, users):
-        
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # If a user is not asking for a service, then randomly select a service for that user (he/she can also keep going to not request any service).  #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
         for user in users:
+            # Update current user request only if the current user is not already requesting a service:
             if (user._info[1]==NO_SERVICE):
                 
                 type_of_service = scenario_objects.User.which_service()
@@ -516,23 +526,32 @@ class UAVEnv(gym.Env):
                 user._info[5] = service_quantity
 
     def move_users(self, current_iteration):
-      
+        # # # # # # # # # # # # # # # # 
+        # Move the users on the map.  #
+        # # # # # # # # # # # # # # # #
+
         for user_idx in range(self.n_users):
+            # Move all the users at each iteration step only if the current iteration step is lower than the number of steps to move the users:
             if (current_iteration<self.k_steps_to_walk):
                 self.users[user_idx]._x_coord = self.users_walk_steps[user_idx][current_iteration][0]/CELL_RESOLUTION_PER_COL
                 self.users[user_idx]._y_coord = self.users_walk_steps[user_idx][current_iteration][1]/CELL_RESOLUTION_PER_ROW
                 self.users[user_idx]._z_coord = self.users_walk_steps[user_idx][current_iteration][2]
 
     def compute_users_walk_steps(self):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # Perform SIDE EFFECT on 'k_steps_to_walk', 'users_walk_steps', 'self.clusterer', 'self.users_clusters', 'self.cluster_centroids' and 'self.clusters_radiuses'. #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         
         min_steps = 2
         max_steps = 5
         k_steps = np.random.random_integers(min_steps, max_steps)
         self.k_steps_to_walk = k_steps
         
+        # Users random walk:
         users_walks = scenario_objects.User.k_random_walk(self.users, k_steps)
         self.users_walk_steps = users_walks
 
+        # New clusters detection:
         if (FIXED_CLUSTERS_NUM>0):
             self.clusterer, self.users_clusters = scenario_objects.User.compute_clusterer(self.users) # --> If you use a fixed clusters number, then vary that number; if you use a variable number, then this method will return more values.
         else:
@@ -540,6 +559,6 @@ class UAVEnv(gym.Env):
             self.clusterer = optimal_clusterer
         
         self.cluster_centroids = scenario_objects.User.actual_users_clusters_centroids(self.clusterer)
-        self.clusters_radiuses = scenario_objects.User.actual_clusters_radiuses(self.cluster_centroids, self.users_clusters, FIXED_CLUSTERS_NUM) 
-        
+        self.clusters_radiuses = scenario_objects.User.actual_clusters_radiuses(self.cluster_centroids, self.users_clusters, FIXED_CLUSTERS_NUM) # --> You can also use a variable clusters number in order to fit better inside clusters the users who have moved (in this case set 'fixed_cluster=False' in 'compute_clusterer(..)')
+
         

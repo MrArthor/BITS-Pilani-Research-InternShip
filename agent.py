@@ -16,7 +16,13 @@ MAX_OBS_CELLS = max(obs._z_coord for obs in obs_cells) if DIMENSION_2D==False el
 MAX_UAV_HEIGHT = int(MAX_OBS_CELLS)
 
 class Agent:
-    
+    '''
+    |--------------------------------------------------------------------------------------|
+    |Define the agent by its coordinates, occupied cell, performing action and its distance|
+    |from charging stations and users clusters.                                            |
+    |--------------------------------------------------------------------------------------|
+    '''
+
     def __init__(self, pos, ID, toward, action, bandwidth, battery_level, footprint, max_uav_height, action_set, TR, EC, DG, d_ag_cc):
         self._uav_ID = ID
         self._x_coord = pos[0]
@@ -539,6 +545,14 @@ class Agent:
 
     @staticmethod
     def n_served_users_in_foot(users_in_foot):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # In this method it is assumed that all the users inside the UAV footprint are served;                      #
+        # every user has the same priority and ask for a single or multi-service (according to the selected case).  #
+        # A possible limitaton on the bandwidth is taken into account in 'users_in_uav_footprint' method.           #
+        # It simply returns the number of the users inside the current UAv footprint.                         #                                     
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+        # This method could be redundant if no heuristic function is provided
         if (MULTI_SERVICE==True):
             TS_service = 0
             EC_service = 0
@@ -566,29 +580,49 @@ class Agent:
 
     @staticmethod
     def set_not_served_users(users, all_users_in_all_foots, serving_uav_id, QoEs_store, current_iteration, current_provided_services):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+        # Set the users which are not served in case of:                                                      #
+        #   - continuous and infinite service request;                                                        #
+        #   - discrete and variable service request;                                                          #
+        # 'all_users_in_all_foots' is a list containing all the users inside all the footprints of each UAVs. #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+        # Set the users not served (during a single iteration of each UAV):
         for user in users:
             
             if (not user in all_users_in_all_foots):
                 user._info[0] = False
 
+            # Update the info related to the current user (only when all the UAVs have performed their actions):
             if (serving_uav_id==N_UAVS):
                 if (MULTI_SERVICE==False):
                     user.user_info_update_inf_request(QoEs_store, current_iteration) # --> Obviously 'current_provided_services' is not used in this case
                 else:
                     user.user_info_update(QoEs_store, current_iteration, current_provided_services)
 
+# ______________________________________________________________________________________________________________________________________________________________
+# I) BATTERY CONSUMPTION: only if propulsion and UAVs services are considered together in the same and unique (average) consumption.
 
     def residual_battery1(self, move_action):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # Battery level decrement after motion (and service at the same time).  #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         self._battery_level -= PERC_CONSUMPTION_PER_ITERATION
 
     def needed_battery_to_come_home(self):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # Battery percentage needed to go to the closesest charging station.  #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         needed_battery_to_cs = self._n_step_to_the_closest_cs*PERC_BATTERY_TO_GO_TO_CS
 
         return needed_battery_to_cs
 
     def residual_battery_when_come_home(self):
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+        # Battery consumption when go to a charging station (without serving).  #
+        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         if (self._current_consumption_to_go_cs == PERC_CONSUMPTION_PER_ITERATION):
             self._battery_level -= PERC_CONSUMPTION_PER_ITERATION

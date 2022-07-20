@@ -1,5 +1,4 @@
 # NETWORK MAIN CLASSES AND METHODS DEFINITION RELATED TO IT.
-from pylayers.antprop.loss import *
 
 class Networking:
 
