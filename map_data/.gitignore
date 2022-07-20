@@ -1,0 +1,5 @@
+
+pylayers/
+__pycache__/
+Cases/
+*.npy
