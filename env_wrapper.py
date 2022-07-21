@@ -16,7 +16,6 @@ from my_utils import *
 import agent
 from Astar import *
 
-# _________ Main training parameters:_________
 
 SHOW_EVERY = 30
 LEARNING_RATE = 1.0
@@ -29,10 +28,6 @@ EPSILON_MIN2 = 0.4
 max_value_for_Rmax = 100
 ITERATIONS_PER_EPISODE = 30
 start_q_table = None
-# _____________________________________________
-
-
-# __________________ Main loadings: __________________
 
 env = gym.make('UAVEnv-v0')
 MAX_UAV_HEIGHT = env.max_uav_height
@@ -40,7 +35,6 @@ n_actions = env.nb_actions
 actions_indeces = range(n_actions)
 cs_cells = env.cs_cells
 cs_cells_coords_for_UAVs = [(cell._x_coord, cell._y_coord) for cell in cs_cells] if DIMENSION_2D==True else [(cell._x_coord, cell._y_coord, cell._z_coord) for cell in cs_cells]
-#cells_matrix = env.cells_matrix
 action_set_min = env.action_set_min
 if (UNLIMITED_BATTERY==False):
     q_table_action_set = env.q_table_action_set
@@ -50,16 +44,11 @@ if (UNLIMITED_BATTERY==False):
 reset_uavs = env.reset_uavs
 plot = plotting.Plot()
 centroids = env.cluster_centroids
-# Scale centroids according to the selected resolution:
 env_centroids = [(centroid[0]/CELL_RESOLUTION_PER_COL, centroid[1]/CELL_RESOLUTION_PER_ROW) for centroid in centroids]
 
-# _____________________________________________________
 
 def show_and_save_info(q_table_init, q_table, dimension_space, battery_type, users_request, reward_func, case_directory):
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    # Save the main settings in 'env_and_train_info.txt' file and show them before training start.  #
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+  
     info = []
 
     info1 = "\n\n_______________________________________ENVIRONMENT AND TRAINING INFO: _______________________________________\n"
@@ -157,7 +146,6 @@ def show_and_save_info(q_table_init, q_table, dimension_space, battery_type, use
         info23 = "\nUSERS ACCOUNTS: " + str(USERS_ACCOUNTS)
     info.append(info23)
     if (INF_REQUEST == True):
-        # If the users service request is infite, then we assume that the UAVs are providing only one service.
         info24 = "\nNUMBER SERVICES PROVIDED BY UAVs: 1"
     else:
         info24 = "\nNUMBER SERVICES PROVIDED BY UAVs: 3"
@@ -189,13 +177,9 @@ def show_and_save_info(q_table_init, q_table, dimension_space, battery_type, use
 
     file.close()
 
-    #time.sleep(5)
 
 def compute_subareas(area_width, area_height, x_split, y_split):
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    # Return 'xy_limits' and middle points for some subareas (oo the all considered map) which can be used for a Q-table initialization based on 'a priori knowledge'.  #
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+    
     subW_min = subH_min = 0
     subW_max = area_width/x_split
     subH_max = area_height/y_split
@@ -211,7 +195,6 @@ def compute_subareas(area_width, area_height, x_split, y_split):
             x_limits = (subW_min, W_max)
             y_limits = (subH_min, H_max)
             subareas_xy_limits.append([x_limits, y_limits])
-            # Compute the middle point of each subarea: 
             subareas_middle_points.append((subW_min + (W_max - subW_min)/2, subH_min + (H_max - subH_min)/2))
             
             subH_min = H_max
@@ -222,35 +205,28 @@ def compute_subareas(area_width, area_height, x_split, y_split):
     return subareas_xy_limits, subareas_middle_points
 
 def compute_prior_rewards(agent_pos_xy, best_prior_knowledge_points):
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-    # Compute the values used to inizialized the Q-table based on 'a priori initialization'.  #
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+    
     actions = env.q_table_action_set
-    # Initialize a random agent just to use easily the 'move' methods for 2D and 3D cases:
     agent_test = agent.Agent((agent_pos_xy[0], agent_pos_xy[1], 0), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
-    # Compute all the possible positions according to the available actions
     if (DIMENSION_2D == True):
-        # Prior knowledge obvoiusly does not take into account the battery level: 
         new_agent_pos_per_action = [agent_test.move_2D_unlimited_battery((agent_pos_xy[0], agent_pos_xy[1]), action) for action in actions]
     else:
         new_agent_pos_per_action = [agent_test.move_3D_unlimited_battery((agent_pos_xy[0], agent_pos_xy[1], agent_pos_xy[2]), action) for action in actions]
     prior_rewards = []
     for pos in new_agent_pos_per_action:
         current_distances_from_best_points = [LA.norm(np.array([pos[0], pos[1]]) - np.array(best_point)) for best_point in best_prior_knowledge_points]
-        # The reference distance for the reward in the current state is based on the distance between the agent and the closer 'best point':
+        
         current_reference_distance = min(current_distances_from_best_points)
         current_normalized_ref_dist = current_reference_distance/diagonal_area_value
         prior_rewards.append(1 - current_normalized_ref_dist)
 
     return prior_rewards
 
-# _________________________________ Check if Q-table initialization is based on 'a prior knoledge' _________________________________
 
 if (PRIOR_KNOWLEDGE == True):
     subareas_limits, subareas_middle_points = compute_subareas(CELLS_COLS, CELLS_ROWS, X_SPLIT, Y_SPLIT)
     best_prior_knowledge_points = []
-    diagonal_area_value = sqrt(pow(CELLS_ROWS, 2) + pow(CELLS_COLS, 2)) # --> The diagonal is the maximum possibile distance between two points, and then it will be used to normalize the distance when the table is initialized under the assumption of 'prior knowledge'. 0.5 is used because the UAV is assumed to move from the middle of a cell to the middle of another one.
+    diagonal_area_value = sqrt(pow(CELLS_ROWS, 2) + pow(CELLS_COLS, 2)) 
 
     for centroid in env_centroids:
         centroid_x = centroid[0]
@@ -267,43 +243,31 @@ DEFAULT_CLOSEST_CS = (None, None, None) if DIMENSION_2D==False else (None, None)
 # ___________________________________________________________________________________________________________________________________
 
 def go_to_recharge(action, agent):
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #  
-    # Perform SIDE EFFECT on '_path_to_the_closest_CS' and '_current_pos_in_path_to_CS'.  #
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-
-    # agent._coming_home is set equal to True inside 'move' method, which is called inside 'step' method (just after 'choose_action'). Thus, here it is not needed.
     closest_CS = agent._cs_goal
-    # Compute the path to the closest CS only if needed:
     if (closest_CS == DEFAULT_CLOSEST_CS):
-        _ = agent.compute_distances(cs_cells) # --> Update the closest CS just in case the agent need to go the CS (which is obviously the closest one).
+        _ = agent.compute_distances(cs_cells) 
         agent._path_to_the_closest_CS = astar(env.cells_matrix, env.get_agent_pos(agent), agent._cs_goal)
-        agent._current_pos_in_path_to_CS = 0 # --> when compute the path, set to 0 the counter indicating the current position (which belongs to the computed path) you have to go. 
-
+        agent._current_pos_in_path_to_CS = 0
 def choose_action(uavs_q_tables, which_uav, obs, agent, battery_in_CS_history, cells_matrix):
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-    # Return the chosen action according to the current set of action which depends on the considered scenario, battery level and other parameters:   #
-    # SIDE EFFECT on different agents attributes are performed.                                                                                       #
-    # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-    if ( (ANALYZED_CASE == 1) or (ANALYZED_CASE == 3) ): # --> UNLIMITED BATTERY:
+    
+    if ( (ANALYZED_CASE == 1) or (ANALYZED_CASE == 3) ): 
         obs = tuple([round(ob, 1) for ob in obs])
-    else: # --> LIMITED BATTERY:
+    else: 
         coords = tuple([round(ob, 1) for ob in obs[0]])
         obs = tuple([coords, obs[1]]) 
 
     #obs = tuple([round(Decimal(ob), 1) for ob in obs])
-    #print(obs)
     all_actions_values = [values for values in uavs_q_tables[which_uav][obs]]
     current_actions_set = agent._action_set
     
     if (UAV_STANDARD_BEHAVIOUR==False):
 
         if UNLIMITED_BATTERY == False:
-            if (current_actions_set == action_set_min): # == ACTION_SPACE_3D_MIN
+            if (current_actions_set == action_set_min): 
                 all_actions_values[GO_TO_CS_INDEX] = -inf
                 all_actions_values[CHARGE_INDEX] = -inf
             
-            elif (current_actions_set == come_home_set): # == ACTION_SPACE_3D_COME_HOME
+            elif (current_actions_set == come_home_set): 
 
                 if ( (agent._coming_home == True) and (env.get_agent_pos(agent)!=agent._cs_goal) ):
                     action = GO_TO_CS_INDEX
@@ -328,11 +292,10 @@ def choose_action(uavs_q_tables, which_uav, obs, agent, battery_in_CS_history, c
                     
                     return action
             
-            elif (current_actions_set == charging_set): # == ACTION_SPACE_3D_WHILE_CHARGING
+            elif (current_actions_set == charging_set): 
                 
                 if ( (agent.check_if_on_CS()) and (agent._battery_level < FULL_BATTERY_LEVEL) ):
                     action = CHARGE_INDEX
-                    # agent._coming_home is set equal to True inside 'move' method, which is called inside 'step' method (just after 'choose_action'). Thus, here it is not needed.
                     
                     return action
                 
@@ -345,7 +308,6 @@ def choose_action(uavs_q_tables, which_uav, obs, agent, battery_in_CS_history, c
 
     if (UAV_STANDARD_BEHAVIOUR==False):
         if (rand > EPSILON):
-            # Select the best action so far (based on the current action set of the agent, assign actions values to a reduce action set):
             action = np.argmax(all_actions_values)
             
         else:
@@ -353,7 +315,6 @@ def choose_action(uavs_q_tables, which_uav, obs, agent, battery_in_CS_history, c
             n_current_actions_to_consider = n_actions-n_actions_to_not_consider
             prob_per_action = 1/n_current_actions_to_consider
             probabilities = [prob_per_action if act_idx < n_current_actions_to_consider else 0.0 for act_idx in actions_indeces]
-            # Select the action randomly:
             action = np.random.choice(actions_indeces, p=probabilities)
     else:
         
@@ -397,12 +358,10 @@ def choose_action(uavs_q_tables, which_uav, obs, agent, battery_in_CS_history, c
 
     return action
 
-# ________________________________________ Assign a number_id to each analyzed case in order to initialize the proper Q-table based on te current case: ________________________________________
 
 ANALYZED_CASE = 0
 
 if ( (USERS_PRIORITY == False) and (CREATE_ENODEB == False) ):
-    # 2D case with UNLIMITED UAVs battery autonomy:
     if ( (DIMENSION_2D == True) and (UNLIMITED_BATTERY == True) ):
         ANALYZED_CASE = 1
         considered_case_directory = "2D_un_bat"
@@ -410,7 +369,6 @@ if ( (USERS_PRIORITY == False) and (CREATE_ENODEB == False) ):
         battery_type = "Unlimited"
         reward_func = "Reward function 1"
 
-    # 2D case with LIMITED UAVs battery autonomy:
     elif ( (DIMENSION_2D == True) and (UNLIMITED_BATTERY == False) ):
         ANALYZED_CASE = 2
         considered_case_directory = "2D_lim_bat"
@@ -418,7 +376,6 @@ if ( (USERS_PRIORITY == False) and (CREATE_ENODEB == False) ):
         battery_type = "Limited"
         reward_func = "Reward function 2"
 
-    # 3D case with UNLIMITED UAVs battery autonomy:
     elif ( (DIMENSION_2D == False) and (UNLIMITED_BATTERY == True) ):
         ANALYZED_CASE = 3
         considered_case_directory = "3D_un_bat"
@@ -426,7 +383,6 @@ if ( (USERS_PRIORITY == False) and (CREATE_ENODEB == False) ):
         battery_type = "Unlimited"
         reward_func = "Reward function 1"
 
-    # 3D case with LIMITED UAVs battery autonomy:
     elif ( (DIMENSION_2D == False) and (UNLIMITED_BATTERY == False) ):
         ANALYZED_CASE = 4
         considered_case_directory = "3D_lim_bat"
@@ -435,13 +391,11 @@ if ( (USERS_PRIORITY == False) and (CREATE_ENODEB == False) ):
         reward_func = "Reward function 2"
 
     if (INF_REQUEST == True):
-        #setting_not_served_users = agent.Agent.set_not_served_users_inf_request
         service_request_per_epoch = env.n_users*ITERATIONS_PER_EPISODE
         considered_case_directory += "_inf_req"
         users_request = "Continue"
     else:
-        #setting_not_served_users = agent.Agent.set_not_served_users
-        service_request_per_epoch = 0 # --> TO SET --> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        service_request_per_epoch = 0 
         considered_case_directory += "_lim_req"
         users_request = "Discrete"
         if (MULTI_SERVICE==True):
@@ -450,20 +404,8 @@ if ( (USERS_PRIORITY == False) and (CREATE_ENODEB == False) ):
 
 else:
 
-    #CREATE_ENODEB = False
-    #DIMENSION_2D = False
-    #UNLIMITED_BATTERY = True
-    #INF_REQUEST = True
-    #STATIC_REQUEST = True
-    #USERS_PRIORITY = False
     assert False, "Environment parameters combination not implemented yet: STATIC_REQUEST: %s, DIMENSION_2D: %s, UNLIMITED_BATTERY: %s, INF_REQUEST: %s, USERS_PRIORITY: %s, CREATE_ENODEB: %s"%(STATIC_REQUEST, DIMENSION_2D, UNLIMITED_BATTERY, INF_REQUEST, USERS_PRIORITY, CREATE_ENODEB)
-    pass # TO DO --> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-# ______________________________________________________________________________________________________________________________________________________________________________________________
-
-
-# ________________________________________ Directory cration to save images and data: ________________________________________
-
+    pass 
 considered_case_directory += "_" + str(N_UAVS) + "UAVs" + "_" + str(len(env.cluster_centroids)) + "clusters"
 
 cases_directory = "Cases"
@@ -483,19 +425,13 @@ if not isdir(cases_directory): mkdir(cases_directory)
 if not isdir(join(cases_directory, considered_case_directory)): mkdir(join(cases_directory, considered_case_directory))
 if not isdir(saving_directory): mkdir(saving_directory)
 
-# _____________________________________________________________________________________________________________________________
-
-
-# ________________________________________________________________________________ Q-table initialization: ________________________________________________________________________________________________
 
 map_width = CELLS_COLS
 map_length = CELLS_ROWS
 map_height = MAXIMUM_AREA_HEIGHT
 
-# Agents initialization:
 agents = env.agents
 
-# It is called Q-table, but if SARSA algorithm is used, it will be actually a SARSA-table:
 uavs_q_tables = None
 
 if uavs_q_tables is None:
@@ -509,14 +445,14 @@ if uavs_q_tables is None:
         current_uav_q_table = {}
         current_uav_explored_table = {}
         
-        for x_agent in np.arange(0, map_width+1, 0.2): #range(map_width)
+        for x_agent in np.arange(0, map_width+1, 0.2): 
 
-            for y_agent in np.arange(0, map_length+1, 0.2): #range(map_length)
+            for y_agent in np.arange(0, map_length+1, 0.2): 
 
                 x_agent = round(x_agent, 1)
                 y_agent = round(y_agent, 1)
 
-                # 2D case with UNLIMITED UAVs battery autonomy:
+               
                 if (ANALYZED_CASE == 1):
                     
                     if (PRIOR_KNOWLEDGE == True):
@@ -529,7 +465,7 @@ if uavs_q_tables is None:
 
                     current_uav_explored_table[(x_agent, y_agent)] = [False for action in range(n_actions)]
 
-                # 2D case with LIMITED UAVs battery autonomy:
+                
                 elif (ANALYZED_CASE == 2):
                     for battery_level in np.arange(0, FULL_BATTERY_LEVEL+1, PERC_CONSUMPTION_PER_ITERATION):
 
@@ -543,7 +479,6 @@ if uavs_q_tables is None:
 
                         current_uav_explored_table[(x_agent, y_agent), battery_level] = [False for action in range(n_actions)]                     
                 
-                # 3D case with UNLIMITED UAVs battery autonomy:
                 elif (ANALYZED_CASE == 3):
                     for z_agent in range(MIN_UAV_HEIGHT, MAX_UAV_HEIGHT, UAV_Z_STEP):
 
@@ -557,7 +492,6 @@ if uavs_q_tables is None:
 
                         current_uav_explored_table[(x_agent, y_agent, z_agent)] = [False for action in range(n_actions)]
 
-                # 3D case with LIMITED UAVs battery autonomy:
                 elif (ANALYZED_CASE == 4):
                     if (UAV_STANDARD_BEHAVIOUR == False):
                         range_for_z = range(MIN_UAV_HEIGHT, MAX_UAV_HEIGHT, UAV_Z_STEP)
@@ -588,7 +522,6 @@ else:
     with open(start_q_table, "rb") as f:
         q_table = pickle.load(f)
 
-# _________________________________________________________________________________________________________________________________________________________________________________________________________
 
 show_and_save_info(q_table_init, uavs_q_tables[0], dimension_space, battery_type, users_request, reward_func, saving_directory)
 
@@ -607,7 +540,6 @@ for uav in range(1, N_UAVS+1):
     if not isdir(current_q_table_dir): mkdir(current_q_table_dir)
 uav_directory = uav_ID
 
-# ________________________________________ Variable initialization before training loop: __________________________________________
 
 uavs_episode_rewards = [[] for uav in range(N_UAVS)]
 users_in_foots = [[] for uav in range(N_UAVS)]
@@ -630,8 +562,6 @@ else:
     GO_TO_CS_INDEX = GO_TO_CS_3D_INDEX
     GO_TO_CS_INDEX_HOME_SPACE = GO_TO_CS_3D_INDEX_HOME_SPACE
 
-#time.sleep(5)
-
 epsilon_history = [0 for ep in range(EPISODES)]
 crashes_history = [0 for ep in range(EPISODES)] 
 battery_in_CS_history = [[] for uav in range(N_UAVS)]
@@ -643,7 +573,6 @@ users_bandwidth_request_per_UAVfootprint = [[0 for ep in range(EPISODES)] for ua
 
 MOVE_USERS = False
 
-# ________________________________________________________________________________ Training start: _____________________________________________________________________________________________________________
 
 print("\nSTART TRAINING . . .\n")
 for episode in range(1, EPISODES+1):
@@ -663,7 +592,7 @@ for episode in range(1, EPISODES+1):
 
     print("| EPISODE: {ep:3d} | Epsilon: {eps:6f}".format(ep=episode, eps=EPSILON))
 
-    QoEs_store = [[], []] # --> Store QoE1 and QoE2
+    QoEs_store = [[], []] 
     current_QoE3 = 0
     users_served_time = 0
     users_request_service_elapsed_time = 0
@@ -678,7 +607,6 @@ for episode in range(1, EPISODES+1):
     ec_active_users_current_it = 0
     dg_active_users_current_it = 0
     
-    # Each 30 minutes: 
     for i in range(ITERATIONS_PER_EPISODE):
 
         if (INF_REQUEST==True):
@@ -698,10 +626,9 @@ for episode in range(1, EPISODES+1):
         env.all_users_in_all_foots = [] 
         for UAV in range(N_UAVS): 
             #print("ID AGENTE: ", agents[UAV]._uav_ID)
-            # Skip analyzing the current UAV features until it starts to work (you can set a delayed start for each uav):
+            
             current_iteration = i+1
             if (episode==1):
-                # Case in which are considered the UAVs from the 2-th to the n-th:
                 if (UAV>0):
                     if (current_iteration!=(DELAYED_START_PER_UAV*(UAV))):
                         pass
@@ -839,16 +766,14 @@ for episode in range(1, EPISODES+1):
 
     
     print("\nRendering animation for episode:", episode)
-    env.render()
+    #env.render()
     print("Animation rendered.\n")
     
-    #if ((episode%500)==0): #(episode%250)==0 # --> You can change the condition to show (to save actually) or not the scenario of the current episode.
     env.render(saving_directory, episode, 500)
     if ((episode%500)==0):
         plot.users_wait_times(env.n_users, env.users, saving_directory, episode)
         
-    #env.agents_paths = [[0 for iteration in range(ITERATIONS_PER_EPISODE)] for uav in range(N_UAVS)] # --> Actually is should be useless because the values are overwritten on the previous ones.
-
+    
     n_discovered_users = len(env.discovered_users)
     
     if ( (n_discovered_users/env.n_users) >= 0.85):
@@ -915,27 +840,4 @@ if (INF_REQUEST==False):
     plot.bandwidth_for_each_epoch(EPISODES, saving_directory, UAVs_used_bandwidth, users_bandwidth_request_per_UAVfootprint)
     plot.users_covered_percentage_per_service(provided_services_per_epoch, EPISODES, join(saving_directory, "Services Provision"))
 
-for uav in range(N_UAVS):
-    plot.UAVS_reward_plot(EPISODES, uavs_episode_rewards, saving_directory)
-    plot.UAVS_reward_plot(EPISODES, q_values, saving_directory, q_values=True)
 
-print("Qoe charts, UAVs rewards and Q-values saved.")
-print("\nSaving Epsilon chart trend . . .")
-plot.epsilon(epsilon_history, EPISODES, saving_directory)
-print("Epsilon chart trend saved.")
-
-print("Saving Q-Tables for episode", episode, ". . .")
-for uav in range(1, N_UAVS+1):
-    saving_qtable_name = q_tables_directories[uav-1] + f"/qtable-ep{episode}.npy"
-    np.save(saving_qtable_name, uavs_q_tables)
-print("Q-Tables saved.\n")
-
-with open(join(saving_directory, "q_tables.pickle"), 'wb') as f:
-    pickle.dump(uavs_q_tables, f)
-
-print("Saving Min and Max values related to the Q-Tables for episode", episode, ". . .")
-for uav in range(1, N_UAVS+1):
-    plot.actions_min_max_per_epoch(uavs_q_tables, q_tables_directories[uav-1], episode, uav)
-print("Min and Max values related to the Q-Tables for episode saved.\n")
-
-# ________________________________________________________________________________________________________________________________________________________________________________________________________

@@ -1,4 +1,3 @@
-# MULTI_UAV GYM ENVIRONMENT 
 
 import gym
 import sys
@@ -21,7 +20,7 @@ plot = plotting.Plot()
 class UAVEnv(gym.Env):
 
     def __init__(self):
-        # Setting upper and lower bounds for actions values:
+
         upper_limits = np.array([val[0] for val in LIMIT_VALUES_FOR_ACTION])
         lower_limits = np.array([val[1] for val in LIMIT_VALUES_FOR_ACTION])
 
@@ -49,9 +48,9 @@ class UAVEnv(gym.Env):
         self.obs_cells = load.obs_cells
         self.max_uav_height = max([obs._z_coord for obs in self.obs_cells]) if DIMENSION_2D==False else 0
         self.cs_cells = load.cs_cells
-        # Set the CS position according to the desired resolution cells:
+
         self.initial_uavs_pos = agent.Agent.setting_agents_pos(self.cs_cells) if UNLIMITED_BATTERY==False else UAVS_POS
-        self.agents = agent.Agent.initialize_agents(self.initial_uavs_pos, self.max_uav_height, self.action_set_min) # Agents initialization
+        self.agents = agent.Agent.initialize_agents(self.initial_uavs_pos, self.max_uav_height, self.action_set_min) 
         self.eNB_cells = load.enb_cells
         self.points_status_matrix = load.points_status_matrix
         self.cells_status_matrix = load.cells_status_matrix
@@ -61,7 +60,6 @@ class UAVEnv(gym.Env):
         self.clusters_radiuses = load.initial_clusters_radiuses
         initial_users = load.initial_users
         for user in initial_users:
-            # Set the users coordinates according to the desired resolution cell:
             user._x_coord /= CELL_RESOLUTION_PER_COL 
             user._y_coord /= CELL_RESOLUTION_PER_ROW
         self.users = initial_users
@@ -77,31 +75,19 @@ class UAVEnv(gym.Env):
         self.n_ec_active = 0
         self.n_dg_active = 0
         self.agents_paths = [[self.get_agent_pos(self.agents[uav])] for uav in range(N_UAVS)]
-        #self.agents_paths = [[0 for iteration in range(ITERATIONS_PER_EPISODE)] for uav in range(N_UAVS)]
         self.last_render = 0
         self.instant_to_render = 0
 
     def step_agent(self, agent, action):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # - 2D/3D cases;                                                                                    #
-        # - UNLIMITED/LIMITED battery;                                                                      #
-        # - Constat battery consumption wich includes both services and motions of the UAVs;                #
-        # - All the users have the same priority (each of the is served) and and ask for the same service;  # 
-        # - It is possible to set multi-service UAVs only with the following settings:                      #
-        #       * 3D scenario;                                                                              #
-        #       * Limited UAV bandwidth;                                                                    #
-        #       * discrete and discontinuos users service request (i.e. INF_REQUEST=False).                 #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+        
         info = ""
 
 
         self.agents_paths[agent._uav_ID].append(self.get_agent_pos(agent))
-        #self.agents_paths[agent._uav_ID].append(self.get_agent_pos(agent))
-
+     
         if (UAV_STANDARD_BEHAVIOUR==False):
             current_action = self.q_table_action_set[action]
-            agent_pos_ = agent.move(current_action, self.cells_matrix) # --> move_2D_unlimited_battery
+            agent_pos_ = agent.move(current_action, self.cells_matrix)
         else:
             current_action = ACTION_SPACE_STANDARD_BEHAVIOUR.index(action)
             agent_pos_ = agent.move_standard_behaviour(action)
@@ -117,13 +103,9 @@ class UAVEnv(gym.Env):
             else:
                 self.current_requested_bandwidth = bandwidth_request_in_current_footprint
 
-        # Compute the number of users which are served by the current UAV agent (useless at the moment, since it is not return by this method):
-        n_served_users = agent.n_served_users_in_foot(agent._users_in_footprint) # --> This mainly performs a SIDE-EFFECT on the info 'served or not served' related to the users.
-
-        # For the current iteration, add the users inside the footprint of the current UAV agent:  
+        n_served_users = agent.n_served_users_in_foot(agent._users_in_footprint)
         for user_per_agent_foot in current_users_in_footprint:
-            self.all_users_in_all_foots.append(user_per_agent_foot) # --> SIDE-EFFECT on 'self.all_users_in_all_foots'
-
+            self.all_users_in_all_foots.append(user_per_agent_foot) 
         agent._x_coord = agent_pos_[0]
         agent._y_coord = agent_pos_[1]
         if (DIMENSION_2D==False):
@@ -149,7 +131,7 @@ class UAVEnv(gym.Env):
             else:
                 reward = 0.0
 
-        # Every time the action is undertaken by the 'first' UAV, then increse 'self.last_render':
+
         if (agent._uav_ID==0):
             self.last_render += 1
 
@@ -163,7 +145,6 @@ class UAVEnv(gym.Env):
         infos = [0 for uav in range(N_UAVS)]
 
         for uav in range(N_UAVS):
-            #self.agents_paths[uav].append(self.get_agent_pos(self.agents[uav]))
 
             ob, r, d, i = self.step_agent(self.agents[uav], actions[uav])
             obs[uav] = ob
@@ -171,14 +152,10 @@ class UAVEnv(gym.Env):
             dones[uav] = d
             infos[uav] = i
 
-        #self.last_render += 1
 
         return obs, rewards, dones, infos
 
     def cost_reward(self, battery_level, needed_battery):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Cost function base on the the battery consumption.  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         alpha_s = 0
         alpha_c = 0
@@ -204,9 +181,6 @@ class UAVEnv(gym.Env):
         return reward_for_cost, alpha_s, alpha_c
 
     def discount_for_user_wait(self):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Possible discount factor based on the waiting time for a service of the users.  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         n_discovered_users = len(self.discovered_users)
         all_wait_times = sum([wait_time_for_cur_user._info[3] for wait_time_for_cur_user in self.discovered_users])
@@ -221,14 +195,10 @@ class UAVEnv(gym.Env):
         return discount_factor
 
     def reward_function_1(self, users_in_footprint):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Reward function which takes into account only the percentage of covered users.  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         n_users_in_footprint = len(users_in_footprint)
         reward = n_users_in_footprint/(self.n_users/N_UAVS)
         
-        # Case in which a UAV is covering a number of user greater than the one (hypothetically) assigned to each UAV: 
         if (reward>1):
             reward = 1.0
         
@@ -240,12 +210,6 @@ class UAVEnv(gym.Env):
         return reward
 
     def reward_function_2(self, users_in_footprint, battery_level, needed_battery):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Reward function extended 'reward_function_1': it itakes into account also the battery level.  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-        # There is no need to take into account the case in which the agent is going to CS, because when it is 'coming home'
-        # the method 'Agent.users_in_uav_footprint' returns always 0 (the agent is only focused on going to CS withouth serving anyone else).
 
         reward_for_users = self.reward_function_1(users_in_footprint)
 
@@ -263,9 +227,6 @@ class UAVEnv(gym.Env):
         return reward
 
     def reward_function_3(self, users_in_footprint, battery_level, needed_battery, n_tr_active_users, n_ec_active_users, n_dg_active_users):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Reward function extended 'reward_function_2': it itakes into account also the multi-service request and a possiple discount factor for the users waiting time. battery level. #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         reward_for_users = self.reward_function_1(users_in_footprint)
 
@@ -310,11 +271,7 @@ class UAVEnv(gym.Env):
         
         return reward
 
-    def get_active_users(self): # --> It could perform just a simple SIDE-EFFECT with no return values (in this way will be avoided the redundancy) --> !!!!!!!!!!!!!!!!
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Retturn the number of active users (i.e., asking for a service) per each service. #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+    def get_active_users(self):
         n_active_users = 0
         n_inactive_users = 0 
         tr_users = 0
@@ -351,9 +308,6 @@ class UAVEnv(gym.Env):
         return n_active_users, tr_users, ec_users, dg_users, n_tr_served, n_ec_served, n_dg_served
 
     def set_action_set(self, agent):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Set the action space equal to one involving action for 2D case with or without limitation on battery. #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         if ( (agent._battery_level <= CRITICAL_BATTERY_LEVEL) and (agent._charging == False) ):
             agent._action_set = ACTION_SPACE_2D_COME_HOME if DIMENSION_2D==True else ACTION_SPACE_3D_COME_HOME 
@@ -368,9 +322,6 @@ class UAVEnv(gym.Env):
         self.action_space = spaces.Discrete(len(agent._action_set))
 
     def noisy_measure_or_not(self, values_to_warp):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Return the position values of a UAV which could be warped or not according to a 'noise probability'.  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         warped_values = []
         coord_idx = 1
@@ -382,7 +333,7 @@ class UAVEnv(gym.Env):
                 gaussian_noise = np.random.normal(loc=0, scale=1)
                 warped_value = round(value + gaussian_noise)
                 
-                # X coordinate case:
+               
                 if (coord_idx==1):
                     if (warped_value>=AREA_WIDTH):
                         warped_value = AREA_WIDTH - 0.5
@@ -391,7 +342,7 @@ class UAVEnv(gym.Env):
                     else:
                         warped_value += 0.5
                 
-                # Y coordinates case:
+              
                 elif (coord_idx==2):
                     if (warped_value>=AREA_HEIGHT):
                         warped_value = AREA_HEIGHT - 0.5
@@ -400,22 +351,9 @@ class UAVEnv(gym.Env):
                     else:
                         warped_value += 0.5
                 
-                # Z coordinate case (no error on this measurement):
+               
                 elif (coord_idx==3):
-                    warped_value = value # --> Z coordinate has a larger step, thus a gaussian noise could lead to a 'KeyError': for this reason Z coordinate will be not affected by noise
-                '''
-                # Z coordinate case:
-                elif (coord_idx==3):
-                    if (warped_value>MAXIMUM_AREA_HEIGHT):
-                        warped_value = MAXIMUM_AREA_HEIGHT - 0.5
-                    elif (warped_value<MIN_UAV_HEIGHT):
-                        warped_value = MIN_UAV_HEIGHT + 0.5
-                    else:
-                        print("ERRORE QUI")
-                        warped_value += (UAV_Z_STEP + 0.5)
-                        if (warped_value>=MAXIMUM_AREA_HEIGHT):
-                            warped_value = MAXIMUM_AREA_HEIGHT - 0.5
-                '''
+                    warped_value = value 
             else:
                 warped_value = value
 
@@ -426,9 +364,6 @@ class UAVEnv(gym.Env):
         return tuple(warped_values)
 
     def is_terminal_state(self, agent):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        # Return (terminal_state, info): a state is terminal for a UAV only if it is either crashed or charging.  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         if (UNLIMITED_BATTERY==False):
             if ( (agent._battery_level <= 0) and (not agent.check_if_on_CS()) ):
@@ -447,12 +382,8 @@ class UAVEnv(gym.Env):
                 
                 return False, "IS WORKING"
         else:
-            return False, "IS WORKING" # --> TO DEFINE BETTER --> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+            return False, "IS WORKING" 
     def get_agent_pos(self, agent):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        # Return the coordinates ( (x,y) or (x,y,z) according to 2D or 3D case) of the 'agent'. #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         x = agent._x_coord
         y = agent._y_coord
@@ -461,10 +392,7 @@ class UAVEnv(gym.Env):
         return (x, y) if DIMENSION_2D==True else (x, y, z)
 
     def render(self, where_to_save=None, episode=None, how_often_render=None):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Used to save a .gif related to the environment animation for the current episode. #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+        
         self.instant_to_render += 1
 
         if ( (self.instant_to_render==how_often_render) or (how_often_render==None) ):
@@ -485,31 +413,25 @@ class UAVEnv(gym.Env):
 
 
     def reset_uavs(self, agent,):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Replace the 'agent' on an initial position randomly selected among the ones available for UAVs (it happens only when a crash occurs). #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         if (agent._battery_level == 0):
             agent._battery_level = FULL_BATTERY_LEVEL
             arise_pos_idx = np.random.choice(range(N_UAVS))
             arise_pos = self.initial_uavs_pos[arise_pos_idx]
-            agent._x_coord = arise_pos[0]#+0.5
-            agent._y_coord = arise_pos[1]#+0.5
-            agent._z_coord = arise_pos[2]#+0.5
+            agent._x_coord = arise_pos[0]
+            agent._y_coord = arise_pos[1]
+            agent._z_coord = arise_pos[2]
 
             agent._charging = False
             agent._coming_home = False
     def reset(self):
         for uav in range(N_UAVS):  
             self.reset_uavs(self.agents[uav])
-        #return self.observation_space
+        obs = [0 for uav in range(N_UAVS)]
+        return obs
     def update_users_requests(self, users):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # If a user is not asking for a service, then randomly select a service for that user (he/she can also keep going to not request any service).  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         for user in users:
-            # Update current user request only if the current user is not already requesting a service:
             if (user._info[1]==NO_SERVICE):
                 
                 type_of_service = scenario_objects.User.which_service()
@@ -530,41 +452,29 @@ class UAVEnv(gym.Env):
                 user._info[5] = service_quantity
 
     def move_users(self, current_iteration):
-        # # # # # # # # # # # # # # # # 
-        # Move the users on the map.  #
-        # # # # # # # # # # # # # # # #
-
+      
         for user_idx in range(self.n_users):
-            # Move all the users at each iteration step only if the current iteration step is lower than the number of steps to move the users:
             if (current_iteration<self.k_steps_to_walk):
                 self.users[user_idx]._x_coord = self.users_walk_steps[user_idx][current_iteration][0]/CELL_RESOLUTION_PER_COL
                 self.users[user_idx]._y_coord = self.users_walk_steps[user_idx][current_iteration][1]/CELL_RESOLUTION_PER_ROW
                 self.users[user_idx]._z_coord = self.users_walk_steps[user_idx][current_iteration][2]
-    # def reset(self):
-    #     print('booooo')
 
     def compute_users_walk_steps(self):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Perform SIDE EFFECT on 'k_steps_to_walk', 'users_walk_steps', 'self.clusterer', 'self.users_clusters', 'self.cluster_centroids' and 'self.clusters_radiuses'. #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         
         min_steps = 2
         max_steps = 5
         k_steps = np.random.random_integers(min_steps, max_steps)
         self.k_steps_to_walk = k_steps
         
-        # Users random walk:
         users_walks = scenario_objects.User.k_random_walk(self.users, k_steps)
         self.users_walk_steps = users_walks
 
-        # New clusters detection:
         if (FIXED_CLUSTERS_NUM>0):
-            self.clusterer, self.users_clusters = scenario_objects.User.compute_clusterer(self.users) # --> If you use a fixed clusters number, then vary that number; if you use a variable number, then this method will return more values.
+            self.clusterer, self.users_clusters = scenario_objects.User.compute_clusterer(self.users) 
         else:
             optimal_clusterer, users_clusters, optimal_clusters_num, current_best_silhoutte_score = scenario_objects.User.compute_clusterer(self.users, fixed_clusters=False)
             self.clusterer = optimal_clusterer
         
         self.cluster_centroids = scenario_objects.User.actual_users_clusters_centroids(self.clusterer)
-        self.clusters_radiuses = scenario_objects.User.actual_clusters_radiuses(self.cluster_centroids, self.users_clusters, FIXED_CLUSTERS_NUM) # --> You can also use a variable clusters number in order to fit better inside clusters the users who have moved (in this case set 'fixed_cluster=False' in 'compute_clusterer(..)')
-
+        self.clusters_radiuses = scenario_objects.User.actual_clusters_radiuses(self.cluster_centroids, self.users_clusters, FIXED_CLUSTERS_NUM)
         
