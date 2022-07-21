@@ -70,7 +70,7 @@ class UAVEnv(gym.Env):
         self.uav_footprint = ACTUAL_UAV_FOOTPRINT 
         self.n_users = len(self.users)
         self.discovered_users = []
-        self.current_requested_bandwidth = 0 # --> bandwidth requested from all the users belonging to the current (considered) UAV footprint.
+        self.current_requested_bandwidth = 0 
         self.all_users_in_all_foots = []
         self.n_active_users = 0
         self.n_tr_active = 0
@@ -483,6 +483,7 @@ class UAVEnv(gym.Env):
         self.last_render = 0
         self.agents_paths = [[] for uav in range(N_UAVS)]
 
+
     def reset_uavs(self, agent,):
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         # Replace the 'agent' on an initial position randomly selected among the ones available for UAVs (it happens only when a crash occurs). #
@@ -498,6 +499,9 @@ class UAVEnv(gym.Env):
 
             agent._charging = False
             agent._coming_home = False
+    def reset(self):
+        for uav in range(N_UAVS):  
+            self.reset_uavs(self.agents[uav])
 
     def update_users_requests(self, users):
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -536,6 +540,8 @@ class UAVEnv(gym.Env):
                 self.users[user_idx]._x_coord = self.users_walk_steps[user_idx][current_iteration][0]/CELL_RESOLUTION_PER_COL
                 self.users[user_idx]._y_coord = self.users_walk_steps[user_idx][current_iteration][1]/CELL_RESOLUTION_PER_ROW
                 self.users[user_idx]._z_coord = self.users_walk_steps[user_idx][current_iteration][2]
+    # def reset(self):
+    #     print('booooo')
 
     def compute_users_walk_steps(self):
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #

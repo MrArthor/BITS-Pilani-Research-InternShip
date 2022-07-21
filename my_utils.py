@@ -56,7 +56,7 @@ PERC_BATTERY_CHARGED_PER_IT = 20
 BATTERY_CHARGED_PER_IT = round((PERC_BATTERY_CHARGED_PER_IT*FULL_BATTERY_LEVEL)/100)
 #PERC_CONSUMPTION_PER_ITERATION = STEP_REDUCTION_TO_GO_TO_CS
 PERC_BATTERY_TO_GO_TO_CS = int(PERC_CONSUMPTION_PER_ITERATION/4) # --> 4/4 = 1
-N_UAVS = 2
+N_UAVS = 1
 PERC_CONSUMPTION_IF_HOVERING = 2
 
 PROPULSION_BATTERY_CONSUMPTION = 3.33
@@ -98,9 +98,9 @@ RADIAL_DISTANCE_Y = 4
 CREATE_ENODEB = False
 DIMENSION_2D = True # --> Enable/Disable 2D environment
 UNLIMITED_BATTERY = False # --> Enable/Disable battery limitation on UAVs
-INF_REQUEST = True # --> Enable/Disable continuous users requests 
+INF_REQUEST = False # --> Enable/Disable continuous users requests 
 STATIC_REQUEST = True # --> Enable/Disable static (i.e., not moving users) request
-MULTI_SERVICE = False # --> Enable/Disable limitation on UAV bandwidth
+MULTI_SERVICE = True # --> Enable/Disable limitation on UAV bandwidth
 NOISE_ON_POS_MEASURE = False # --> Enable/Disable random error on the position of each UAV used 
 USERS_PRIORITY = False
 

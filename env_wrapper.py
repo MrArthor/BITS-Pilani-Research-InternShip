@@ -28,7 +28,7 @@ EPSILON_MIN2 = 0.4
 
 max_value_for_Rmax = 100
 ITERATIONS_PER_EPISODE = 30
-
+start_q_table = None
 # _____________________________________________
 
 
