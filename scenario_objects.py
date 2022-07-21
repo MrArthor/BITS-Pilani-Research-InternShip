@@ -1028,7 +1028,7 @@ if __name__ == '__main__':
 
     us = User
     centroids = us.centroids_user_cluster_generation(CENTROIDS_MIN_MAX_COORDS, FIXED_CLUSTERS_NUM) # --> You can change these arguments to get clusters spread out in a different way
-    users_clusters, users_xy = us.spread_users_around_clusters(centroids, 1, 1,10, 30) # --> # --> You can change these arguments to get users spread out in a different way among clusters; you can change also the MIN and MAX users number per cluster
+    users_clusters, users_xy = us.spread_users_around_clusters(centroids, 1, 1,15, 15) # --> # --> You can change these arguments to get users spread out in a different way among clusters; you can change also the MIN and MAX users number per cluster
     occurrences = [users_xy.count(user) for user in users_xy]
     users_points_heights = us.users_heights(points_matrix, users_xy)
     n_users = len(users_xy)

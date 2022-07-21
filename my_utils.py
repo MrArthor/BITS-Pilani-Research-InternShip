@@ -11,8 +11,8 @@ def hex_to_rgb(hex):
      return tuple(rgb_percentage)
 
 # LEARNING SELECTION:
-Q_LEARNING = True
-SARSA = False
+Q_LEARNING = False
+SARSA = True
 
 HOSP_SCENARIO = False
 
