@@ -240,7 +240,7 @@ if (PRIOR_KNOWLEDGE == True):
 
 DEFAULT_CLOSEST_CS = (None, None, None) if DIMENSION_2D==False else (None, None)
 
-# ___________________________________________________________________________________________________________________________________
+
 
 def go_to_recharge(action, agent):
     closest_CS = agent._cs_goal
@@ -625,22 +625,18 @@ for episode in range(1, EPISODES+1):
 
         env.all_users_in_all_foots = [] 
         for UAV in range(N_UAVS): 
-            #print("ID AGENTE: ", agents[UAV]._uav_ID)
             
             current_iteration = i+1
             if (episode==1):
                 if (UAV>0):
                     if (current_iteration!=(DELAYED_START_PER_UAV*(UAV))):
                         pass
-                        #continue
-
-            #env.agents_paths[UAV][i] = env.get_agent_pos(agents[UAV])
+                       
             if (NOISE_ON_POS_MEASURE==True):
                 drone_pos = env.noisy_measure_or_not(env.get_agent_pos(agents[UAV]))
             else:
-                drone_pos = env.get_agent_pos(agents[UAV]) #env.agents_paths[UAV][i]
-
-            obs = (drone_pos) if UNLIMITED_BATTERY==True else (drone_pos, agents[UAV]._battery_level) # --> The observation will be different when switch from 2D to 3D scenario and viceversa.
+                drone_pos = env.get_agent_pos(agents[UAV])
+            obs = (drone_pos) if UNLIMITED_BATTERY==True else (drone_pos, agents[UAV]._battery_level) 
 
             if (UNLIMITED_BATTERY==False):
                 env.set_action_set(agents[UAV])
@@ -655,10 +651,10 @@ for episode in range(1, EPISODES+1):
             if (UAV_STANDARD_BEHAVIOUR==True):
                 action = ACTION_SPACE_STANDARD_BEHAVIOUR.index(action)
 
-            if ( (ANALYZED_CASE == 1) or (ANALYZED_CASE == 3) ): # --> UNLIMITED BATTERY
+            if ( (ANALYZED_CASE == 1) or (ANALYZED_CASE == 3) ): 
                 obs = tuple([round(ob, 1) for ob in obs])
                 obs_ = tuple([round(ob, 1) for ob in obs_])
-            else: # --> LIMITED BATTERY
+            else:
                 coords = tuple([round(ob, 1) for ob in obs[0]])
                 obs = tuple([coords, obs[1]])
                 coords_ = tuple([round(ob, 1) for ob in obs_[0]])
@@ -679,22 +675,20 @@ for episode in range(1, EPISODES+1):
                     obs_recorder[UAV] = [() for i in range(ITERATIONS_PER_EPISODE)]
                     continue
                 
-                else: # --> i.e., crashed case:
+                else: 
                     obs_recorder[UAV] = [() for i in range(ITERATIONS_PER_EPISODE)]
             else:
                 
                 if (current_iteration==ITERATIONS_PER_EPISODE):
-                    #print(uavs_episode_reward[UAV], best_policy[UAV])
+                    
                     if uavs_episode_reward[UAV] > best_policy[UAV]:
                         best_policy[UAV] = uavs_episode_reward[UAV]
                         best_policy_obs[UAV] = obs_recorder[UAV]
-                        #print("SALVO LA POLICY !!!!!!!!!!!!!!!!!!!!!!!!!")
+                        
                     obs_recorder[UAV] = [() for i in range(ITERATIONS_PER_EPISODE)]
             
-            # Set all the users which could be no more served after the current UAV action (use different arguments according to the considered case!!!!!!!!!!!!!!!!!!):
             agent.Agent.set_not_served_users(env.users, env.all_users_in_all_foots, UAV+1, QoEs_store, i+1, current_provided_services)
-            #setting_not_served_users(env.users, env.all_users_in_all_foots, UAV+1, QoEs_store, i+1) # --> This make a SIDE_EFFECT on users by updating their info.
-
+            
             if (Q_LEARNING==True):
                 
                 max_future_q = np.max(uavs_q_tables[UAV][obs_])
@@ -721,7 +715,7 @@ for episode in range(1, EPISODES+1):
 
             reset_uavs(agents[UAV])
 
-        current_QoE3 += len(env.all_users_in_all_foots)/len(env.users) if len(env.users)!=0 else 0 # --> Percentage of covered users (including also the users which are not requesting a service but which are considered to have the communication with UAVs on) 
+        current_QoE3 += len(env.all_users_in_all_foots)/len(env.users) if len(env.users)!=0 else 0 
         n_active_users_per_episode[episode-1] = n_active_users
 
     if (INF_REQUEST==False): 
@@ -733,11 +727,11 @@ for episode in range(1, EPISODES+1):
             n_users_provided_for_current_service = current_provided_services[service_idx]/ITERATIONS_PER_EPISODE
             
             if (service_idx==0):
-                n_active_users_per_current_service = tr_active_users_current_ep #tr_active_users
+                n_active_users_per_current_service = tr_active_users_current_ep 
             elif (service_idx==1):
-                n_active_users_per_current_service = ec_active_users_current_ep #ec_active_users
+                n_active_users_per_current_service = ec_active_users_current_ep 
             elif (service_idx==2):
-                n_active_users_per_current_service = dg_active_users_current_ep #dg_active_users
+                n_active_users_per_current_service = dg_active_users_current_ep 
             
             perc_users_provided_for_current_service = n_users_provided_for_current_service/n_active_users_per_current_service if n_active_users_per_current_service!=0 else 0  
             provided_services_per_epoch[episode-1][service_idx] = perc_users_provided_for_current_service
@@ -746,12 +740,10 @@ for episode in range(1, EPISODES+1):
         crashes_history[episode-1] = crashes_current_episode
     
     n_active_users_current_ep = n_active_users_current_it/ITERATIONS_PER_EPISODE
-    users_served_time = sum(QoEs_store[0])/(len(QoEs_store[0])) if len(QoEs_store[0])!=0 else 0 # --> It is divided by its lenght, because here it is measured the percenteage according to which a service is completed (once it starts).
-    users_request_service_elapsed_time = sum(QoEs_store[1])/n_active_users_current_ep if n_active_users_current_ep!=0 else 0 # --> It is divided by the # of active users, beacuse here it is measured the avg elapsed time (among the active users) between a service request and its provision.        
-    
+    users_served_time = sum(QoEs_store[0])/(len(QoEs_store[0])) if len(QoEs_store[0])!=0 else 0
+    users_request_service_elapsed_time = sum(QoEs_store[1])/n_active_users_current_ep if n_active_users_current_ep!=0 else 0 
     QoE3_for_current_epoch = current_QoE3/ITERATIONS_PER_EPISODE
-    User.avg_QoE(episode, users_served_time, users_request_service_elapsed_time, QoE3_for_current_epoch, avg_QoE1_per_epoch, avg_QoE2_per_epoch, avg_QoE3_per_epoch) # --> users_request_service_elapsed_time has to be divided by the iterations number if you do not have the mean value!!!
-
+    User.avg_QoE(episode, users_served_time, users_request_service_elapsed_time, QoE3_for_current_epoch, avg_QoE1_per_epoch, avg_QoE2_per_epoch, avg_QoE3_per_epoch) 
     print(" - Iteration: {it:1d} - Reward per UAV {uav:1d}: {uav_rew:6f}".format(it=i+1, uav=UAV+1, uav_rew=reward))
     
     for UAV in range(N_UAVS):
@@ -785,10 +777,7 @@ file = open(join(saving_directory, "env_and_train_info.txt"), "a")
 
 print("\nTRAINING COMPLETED.\n")
 
-# ________________________________________________________________________________ Training end ________________________________________________________________________________________________________________
 
-
-# ________________________________________________________________________________ Results Saving: ______________________________________________________________________________________________________
  
 for uav_idx in range(N_UAVS):
     if (UNLIMITED_BATTERY==False):
