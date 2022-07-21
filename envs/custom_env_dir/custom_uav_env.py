@@ -427,8 +427,8 @@ class UAVEnv(gym.Env):
     def reset(self):
         for uav in range(N_UAVS):  
             self.reset_uavs(self.agents[uav])
-        obs = [0 for uav in range(N_UAVS)]
-        return obs
+        # obs = [0 for uav in range(N_UAVS)]
+        # return obs
     def update_users_requests(self, users):
 
         for user in users:

@@ -1,11 +1,10 @@
-# MAIN CLASS AND METHODS TO VISUALIZE 2D AND 3D MAP VIEW (WITH POINTS AND CELLS) EITHER OF THE WHOLE ENVIRONMENT OR OF A PART OF IT; IT IS USED ALSO TO SAVE THE STATUS MATRICES.
 
 from os import mkdir
 from os.path import join, isdir
 import numpy as np
 import random
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+from mpl_toolkits.mplot3d import Axes3D 
 import mpl_toolkits.mplot3d.art3d as art3d
 import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
@@ -18,7 +17,6 @@ import mpl_toolkits.mplot3d.axes3d as p3
 from matplotlib import animation
 from statistics import stdev
 
-# If EnodeB has not been created in 'scenario_objets', then if you try to plot it, it will obviously raise an Error.
 
 u = np.linspace(0, 2*np.pi, 50)
 v = np.linspace(0, np.pi, 50)
@@ -26,7 +24,7 @@ v = np.linspace(0, np.pi, 50)
 env_directory = "Environment_Views"
 if not isdir(env_directory): mkdir(env_directory)
 
-MAX_CLUSTERS_COLORS = 20 # --> It is used to generate 20 different colors for 20 different clusters.
+MAX_CLUSTERS_COLORS = 20 # maximum number of clusters to be plotted in the same color
 PLOT_EACH_N_EPOCH = 200
 CONSTANT_FOR_LABELS = 10
 LABELS_EACH_N_EPOCH = PLOT_EACH_N_EPOCH*CONSTANT_FOR_LABELS
@@ -40,15 +38,10 @@ else:
     incr_assumed_coord = 0.0
 
 
-# ENODE case is not still considered combined with the hospitals --> !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 
 class Plot:
-    '''
-    |-------------------------------------------------------------|
-    |Define a class containings method aimed to plot or to compute|
-    |elements used to plot:                                       |
-    |-------------------------------------------------------------|
-    '''
+    
+
 
     def __init__(self):
         clusters_colors, num_color_range = self.RGBA_01_random_colors(MAX_CLUSTERS_COLORS)
@@ -57,12 +50,8 @@ class Plot:
         pass
 
     def update_animation_3D(self, num, dataLines, lines, circles, n_circles_range, ax):
-        # # # # # # # # # # # # #  
-        # 3D animation updating #
-        # # # # # # # # # # # # #
 
         for line, data, circle_idx in zip(lines, dataLines, n_circles_range):
-            # NOTE: there is no .set_data() for 3 dim data...
             line.set_xdata(data[1, :num])
             line.set_ydata(data[0, :num])
             line.set_3d_properties(data[2, :num])
@@ -80,12 +69,9 @@ class Plot:
         return tuple(lines) + tuple(circles)
 
     def update_animation_2D(self, num, dataLines, lines, circles):
-        # # # # # # # # # # # # #  
-        # 2D animation updating #
-        # # # # # # # # # # # # #
 
         for line, data, circle in zip(lines, dataLines, circles):
-            # NOTE: there is no .set_data() for 3 dim data...
+            
             line.set_data(data[0:2, :num])
             line.set_marker("4")
             line.set_markersize(16)
@@ -95,22 +81,13 @@ class Plot:
         return tuple(lines) + tuple(circles)
 
     def compute_status_matrix(self, matrix_area, area_height, area_width):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Returns a matrix made by the elements representing their states;  #
-        # the states are extracted from 'matrix_area'.                      #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         status_matrix = [[matrix_area[i][j]._status for j in range(area_width)] for i in range(area_height)]
 
         return status_matrix
 
     def compute_perceived_status_matrix(self, cells_matrix, area_height, area_width, reduced_height, reduced_width):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Returns a matrix made by the elements representing the 'perceived' states; if a larger resolution w.r.t.      #
-        # the minimum one is used, then there will be cells which results to be occupied in full even if the actual     #
-        # obstacles inside them only occupies a part of them; the 'perceived' states are extracted from 'cells_matrix'. #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+        
         perceived_status_matrix = np.zeros((area_height, area_width))
 
         for r in range(reduced_height):
@@ -133,9 +110,6 @@ class Plot:
         return perceived_status_matrix
 
     def extract_coord_from_xyz(self, coordinates):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-        # Returns in separated lists the coordinates (x,y,z) which are contained in 'coordinates'.  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
         N_coordinates = len(coordinates)
         x_extracted_coords = [coordinates[coords_idx]._x_coord for coords_idx in range(N_coordinates)]
@@ -145,10 +119,7 @@ class Plot:
         return x_extracted_coords, y_extracted_coords, z_extracted_coords
 
     def RGBA_01_random_colors(self, num_colors):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        # Assign as many random color as it is 'num_color'  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
+       
         num_color_range = range(num_colors)
         colors = [None for color in num_color_range]
         
@@ -162,18 +133,11 @@ class Plot:
                       cells_status_matrix=None, perceived_status_matrix=None, users=None, centroids=None,
                       clusters_radiuses=None, area_height=None, area_width=None, N_cells_row=None,
                       N_cells_col=None, agents_paths=None, path_animation=False, where_to_save=None, episode=None, last_render=None):
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-        # Create 3 figures which contains respectively:             #
-        #   -   2D and 3D Points-Map;                               #
-        #   -   2D and 3D Cells-Map;                                #
-        #   -   2D and 3D Mixed-map (i.e., with Points and Cells);  #
-        # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #  
 
         self.num_color_range = range(len(centroids))
 
-        # Define colors to use for the plots:
         WHITE = "#ffffff"
-        DARK_RED = "#800000" # 0.5, 0, 0
+        DARK_RED = "#800000"
         LIGHT_RED = "#ff0000"
         DARK_BLUE = "#000099"
         LIGHT_BLUE = "#66ffff"
@@ -187,7 +151,7 @@ class Plot:
         BROWN = '#A52A2A'
         UAVS_COLORS = [VIOLET, ORANGE, GREY, BROWN]
 
-        # Define colored canvas for the legend:
+        
         DARK_RED_square = mlines.Line2D([], [], color=DARK_RED, marker='s', markersize=15, label="'Point' Hospital")
         LIGHT_RED_square = mlines.Line2D([], [], color=LIGHT_RED, marker='s', markersize=15, label="'Cell' Hospital")
         DARK_BLUE_square = mlines.Line2D([], [], color=DARK_BLUE, marker='s', markersize=15, label="'Point' Obstacles")
@@ -196,7 +160,6 @@ class Plot:
         LIGHT_GREEN_square = mlines.Line2D([], [], color=LIGHT_GREEN, marker='s', markersize=15, label="'Cell' Charging Stations")
         GOLD_circle = mlines.Line2D([], [], color=GOLD, marker='o', markersize=15, label="Users")
 
-        # The following 'magic' number represent the RGBA values for charging stations and obstacles: 
         cs_cells_colors = [(0.4, 1, 0.59, 0.3) for i in range(N_CS)]
         obs_cells_colors = [(0.4, 1, 1, 0.3) for i in range(len(obs_cells))]
         if (HOSP_SCENARIO==True):
@@ -206,7 +169,7 @@ class Plot:
         width = 1
         depth = 1
 
-        # ______________________________________________________________ FIGURE for the animation: ______________________________________________________________
+        
 
         if path_animation == True: 
             
@@ -223,7 +186,6 @@ class Plot:
 
             if (DIMENSION_2D == False):
                 ax = fig.add_subplot(111, projection='3d')
-                #ax = p3.Axes3D(fig)
                 ax.view_init(elev=60, azim=40)
                 if (UNLIMITED_BATTERY == True):
                     cells_status_matrix_un_bat = [[FREE if cells_status_matrix[r][c]==CS_IN else cells_status_matrix[r][c] for c in range(N_cells_col)] for r in range(N_cells_row)]
@@ -241,7 +203,6 @@ class Plot:
                 users_x, users_y, users_z = self.extract_coord_from_xyz(users)
                 users_x_for_2DplotCells, users_y_for_2DplotCells = [float(x)-0.5 for x in users_x], [float(y)-0.5 for y in users_y]
                 users_x_for_3DplotCells, users_y_for_3DplotCells, users_z_for_3DplotCells = [x for x in users_x], [y for y in users_y], users_z
-                #num_clusters = len(centroids)
             
             x_obs_cells, y_obs_cells, z_obs_cells = self.extract_coord_from_xyz(obs_cells)
             x_cs_cells, y_cs_cells, z_cs_cells = self.extract_coord_from_xyz(cs_cells)
@@ -269,7 +230,7 @@ class Plot:
                     ax.bar3d(y_eNB_cells, x_eNB_cells, bottom, width, depth, z_eNB_cells, shade=True, color=(0.5, 0, 0, 0.3), edgecolor="none")
 
                 ax.set_xlim(xmin=0, xmax=CELLS_COLS)
-                ax.set_ylim(ymin=CELLS_ROWS, ymax=0) # --> I want to set 0 in the bottom part of the 2D plane-grid.
+                ax.set_ylim(ymin=CELLS_ROWS, ymax=0) 
                 ax.set_zlim(zmin=0)
                 ax.set_title('3D Animation')
             
@@ -287,7 +248,6 @@ class Plot:
                 if (HOSP_SCENARIO==False):
                     ax.scatter(users_x_for_2DplotCells, users_y_for_2DplotCells, s=10, c=GOLD)
                 
-                # A Graphical approximation is needed in order to get a cluster in 'cells view' which is as closest as possible to the one in 'points view' (The approximation is only graphical):
                 if (HOSP_SCENARIO==False):
                     for cluster_idx in self.num_color_range:
                         [ax.add_artist(plt.Circle([centroids[cluster_idx][0]/CELL_RESOLUTION_PER_ROW-0.25, centroids[cluster_idx][1]/CELL_RESOLUTION_PER_COL-0.25, centroids[cluster_idx][2]], (float(clusters_radiuses[cluster_idx]/(CELL_RESOLUTION_PER_ROW)) + float(clusters_radiuses[cluster_idx]/(CELL_RESOLUTION_PER_COL)))/2, color=self.clusters_colors[cluster_idx], fill=False)) for cluster_idx in self.num_color_range]
@@ -351,13 +311,10 @@ class Plot:
             else:
                 animation_frames = n_agents_paths - last_render
             
-            #print("UEEEEEEEEEEEEEE: ", n_agents_paths, last_render)
-            #print("FRAMEEEEEEEEEEEEEEEEEEEEEEE: ", animation_frames)
-            #print("LINESSSSSSSSSSSSSSSSSSSSSSS: ", lines)
 
             if (DIMENSION_2D == False):
                 n_circles_range = range(len(circles))
-                ani = animation.FuncAnimation(fig, self.update_animation_3D, frames=animation_frames, fargs=(data_path, lines, circles, n_circles_range, ax), interval=100, blit=True, repeat=True) # fargs=(data_path, lines, circles)
+                ani = animation.FuncAnimation(fig, self.update_animation_3D, frames=animation_frames, fargs=(data_path, lines, circles, n_circles_range, ax), interval=100, blit=True, repeat=True) 
             else:
                 ani = animation.FuncAnimation(fig, self.update_animation_2D, frames=animation_frames, fargs=(data_path, lines, circles), interval=100, blit=True, repeat=True)
 
@@ -365,17 +322,14 @@ class Plot:
                 ax.set_zlim(zmin=0)
             
             if ( (where_to_save!=None) and (episode!=None) ):
-                #print("SONO DI QUAAAAAAAAAAAAAAAA")
                 ani.save(join(where_to_save, "animation_ep" + str(episode) + ".gif"), writer='imagemagick')
                 plt.close(fig)
             else:
                 plt.show()
 
-        # ______________________________________________________________ FIGURES FOR STATIC ENVIRNONMENT VISUALIZATION (WITHOUT UAVS): ______________________________________________________________ 
 
         else:
 
-            #num_clusters = len(centroids)
 
             x_obs_points, y_obs_points, z_obs_points = self.extract_coord_from_xyz(obs_points)
             x_cs_points, y_cs_points, z_cs_points = self.extract_coord_from_xyz(cs_points)
