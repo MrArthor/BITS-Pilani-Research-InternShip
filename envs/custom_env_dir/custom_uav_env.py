@@ -502,7 +502,7 @@ class UAVEnv(gym.Env):
     def reset(self):
         for uav in range(N_UAVS):  
             self.reset_uavs(self.agents[uav])
-        return self.observation_space
+        #return self.observation_space
     def update_users_requests(self, users):
         # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
         # If a user is not asking for a service, then randomly select a service for that user (he/she can also keep going to not request any service).  #
