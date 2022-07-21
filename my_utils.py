@@ -338,8 +338,8 @@ DATA_GATHERING = 3
 UAVS_SERVICES = [NO_SERVICE, THROUGHPUT_REQUEST, EDGE_COMPUTING, DATA_GATHERING]
 SERVICE_PROBABILITIES = [0.1, 0.5, 0.25, 0.15]
 
-#CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)], [(7, 7), (7,7)], [(6, 6), (2,2)], [(2, 2), (2,2)]] # --> [(min_x, max_x), (min_y, max_y)]
-CENTROIDS_MIN_MAX_COORDS = [[(7, 7), (7,7)], [(6, 6), (2,2)], [(3, 3), (4,4)]] # [[(7, 7), (7,7)], [(2, 2), (2,2)]]
+CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)], [(7, 7), (7,7)], [(6, 6), (2,2)], [(2, 2), (2,2)]] # --> [(min_x, max_x), (min_y, max_y)]
+#CENTROIDS_MIN_MAX_COORDS = [[(7, 7), (7,7)], [(6, 6), (2,2)], [(3, 3), (4,4)]] # [[(7, 7), (7,7)], [(2, 2), (2,2)]]
 #CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)], [(7, 7), (7,7)]]
 #CENTROIDS_MIN_MAX_COORDS = [[(2,2), (5, 5)]]
 FIXED_CLUSTERS_NUM = len(CENTROIDS_MIN_MAX_COORDS)
