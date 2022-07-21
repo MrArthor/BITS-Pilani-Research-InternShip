@@ -1,7 +1,6 @@
 
 pylayers/
 __pycache__/
-Cases/
 *.npy
 *.npy
 *.index

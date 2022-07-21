@@ -168,7 +168,7 @@ def show_and_save_info(q_table_init, q_table, dimension_space, battery_type, use
     info.append(info26)
     info27 = "\n__________________________________________________________________________________________________________________\n\n"
     info.append(info27)
-
+    
     file = open(join(saving_directory, "env_and_train_info.txt"), "w")
 
     for i in info:

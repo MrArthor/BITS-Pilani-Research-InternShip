@@ -411,7 +411,7 @@ class UAVEnv(gym.Env):
         self.last_render = 0
         self.agents_paths = [[] for uav in range(N_UAVS)]
 
-
+    
     def reset_uavs(self, agent,):
 
         if (agent._battery_level == 0):
@@ -421,14 +421,18 @@ class UAVEnv(gym.Env):
             agent._x_coord = arise_pos[0]
             agent._y_coord = arise_pos[1]
             agent._z_coord = arise_pos[2]
-
+            agent_pos_ = self.get_agent_pos(agent)
             agent._charging = False
             agent._coming_home = False
+            s_ = (agent_pos_, agent._battery_level)
+
+            return s_
     def reset(self):
+        obs=[]
         for uav in range(N_UAVS):  
-            self.reset_uavs(self.agents[uav])
+            obs.append(self.reset_uavs(self.agents[uav]))
         # obs = [0 for uav in range(N_UAVS)]
-        # return obs
+        return obs
     def update_users_requests(self, users):
 
         for user in users:
