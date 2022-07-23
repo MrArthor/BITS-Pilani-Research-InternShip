@@ -761,8 +761,8 @@ for episode in range(1, EPISODES+1):
     #env.render()
     print("Animation rendered.\n")
     
-    env.render(saving_directory, episode, 500)
-    if ((episode%500)==0):
+    env.render(saving_directory, episode, 100)
+    if ((episode%100)==0):
         plot.users_wait_times(env.n_users, env.users, saving_directory, episode)
         
     
