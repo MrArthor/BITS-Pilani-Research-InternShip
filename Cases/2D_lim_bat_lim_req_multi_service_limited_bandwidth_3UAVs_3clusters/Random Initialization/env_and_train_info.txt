@@ -40,13 +40,3 @@ CHARGING STATIONS NUMBER: 2
 ENODEB: No
 __________________________________________________________________________________________________________________
 
-
-Exploration percentage of the Q-Table for UAV:
-1: 0.014863845831587768
-Exploration percentage of the Q-Table for UAV:
-2: 0.014894313897246448
-Exploration percentage of the Q-Table for UAV:
-3: 0.014997905320485967
-QoE1 : 0.0
-QoE2 : 289675.0797230304
-QoE3 : 0.0
