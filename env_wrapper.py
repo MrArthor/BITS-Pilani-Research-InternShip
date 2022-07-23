@@ -1,3 +1,4 @@
+
 import numpy as np
 import sys
 import pickle
@@ -15,6 +16,9 @@ import plotting
 from my_utils import *
 import agent
 from Astar import *
+import warnings
+warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
+warnings.filterwarnings("ignore", category=gym.VisibleDeprecationWarning)
 
 
 SHOW_EVERY = 30
