@@ -18,7 +18,6 @@ import agent
 from Astar import *
 import warnings
 warnings.filterwarnings("ignore", category=np.VisibleDeprecationWarning)
-warnings.filterwarnings("ignore", category=gym.VisibleDeprecationWarning)
 
 
 SHOW_EVERY = 30
