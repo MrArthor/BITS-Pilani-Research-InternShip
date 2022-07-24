@@ -1,9 +1,6 @@
 
 pylayers/
 __pycache__/
-*.npy
-*.npy
 *.index
 *.data-00000-of-00001
 checkpoint
-*.npy
