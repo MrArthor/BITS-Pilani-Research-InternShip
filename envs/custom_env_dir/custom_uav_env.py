@@ -209,22 +209,6 @@ class UAVEnv(gym.Env):
 
         return reward
 
-    def reward_function_2(self, users_in_footprint, battery_level, needed_battery):
-
-        reward_for_users = self.reward_function_1(users_in_footprint)
-
-        alpha_s = 1
-        alpha_c = 0
-        if (needed_battery==None):
-            
-            reward = alpha_s*reward_for_users
-
-        else:
-
-            reward_for_cost, alpha_s, alpha_c = self.cost_reward(battery_level, needed_battery)
-            reward = alpha_s*reward_for_users + alpha_c*reward_for_cost
-
-        return reward
 
     def reward_function_3(self, users_in_footprint, battery_level, needed_battery, n_tr_active_users, n_ec_active_users, n_dg_active_users):
 
