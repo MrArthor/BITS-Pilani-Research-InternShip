@@ -77,8 +77,8 @@ CRITICAL_WAITING_TIME_FOR_SERVICE = 10
 NORMALIZATION_FACTOR_WAITING_TIME_FOR_SERVIE = 120
 
 # AREA DIMENSIONS:
-AREA_WIDTH = 10
-AREA_HEIGHT = 10
+AREA_WIDTH = 20
+AREA_HEIGHT = 20
 LOWER_BOUNDS = 0
 CELL_RESOLUTION_PER_ROW = 1
 CELL_RESOLUTION_PER_COL = 1
@@ -96,7 +96,7 @@ RADIAL_DISTANCE_X = 4
 RADIAL_DISTANCE_Y = 4
 
 CREATE_ENODEB = False
-DIMENSION_2D = True # --> Enable/Disable 2D environment
+DIMENSION_2D = False # --> Enable/Disable 2D environment
 UNLIMITED_BATTERY = False # --> Enable/Disable battery limitation on UAVs
 INF_REQUEST = False # --> Enable/Disable continuous users requests 
 STATIC_REQUEST = True # --> Enable/Disable static (i.e., not moving users) request
